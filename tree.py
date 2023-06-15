@@ -1,6 +1,5 @@
 import random
 from copy import deepcopy
-import matplotlib.pyplot as plt
 
 class Node:
     def __init__(self, value:int):
@@ -168,23 +167,24 @@ class BST:
 
         return max(maxDepth, maxLeft, maxRight)
 
-    def printLeft(self, offset):
-        for _ in range(offset / 2):
+    def printLeft(self, offset, size = 1):
+        for _ in range((int(offset / 2) * (size + 1))):
                 print(' ', end='')
-        for _ in range(offset / 2):
+        for _ in range((int(offset / 2) * (size + 1))):
             print('_', end='')
 
-    def printRight(self, offset):
-        for _ in range((offset / 2) - 1):
+    def printRight(self, offset, size = 1):
+        '''Handles -1'''
+        for _ in range((int(offset / 2) - 1 * (size + 1))):
                 print('_', end='')
-        for _ in range((offset / 2) - 1):
+        for _ in range((int(offset / 2) - 1) * (size + 1)):
             print(' ', end='')
 
-    def printEmpty(self, offset):
-        for _ in range(offset):
+    def printEmpty(self, offset, size = 1):
+        for _ in range(offset * (size + 1)):
             print(' ', end='')
 
-    def print(self): #Root is at (0, 0), leaves are 1 unit appart. Everything else is calculated and drawn from the root down
+    """ def print(self): #Root is at (0, 0), leaves are 1 unit appart. Everything else is calculated and drawn from the root down
         #If tree is empty
         if self.root == None:
             return
@@ -196,30 +196,133 @@ class BST:
         queue = []
         
         #0 case
-        queue.append[self.root.leftChild]
+        queue.append(self.root.leftChild)
         if self.root.leftChild != None:
             #Draw edge
             self.printLeft(offset)
+        else:
+            self.printEmpty(offset)
 
         print(self.root.value, end='')
 
-        queue.append[self.root.rightChild]
+        queue.append(self.root.rightChild)
         if self.root.rightChild != None:
-            print('_', end=0)
+            print('_', end='')
             #Draw edge
-            self.printRight(offset)
-            
+            self.printRight(offset) # handles -1
+        else:
+            print(' ', end='')
+            self.printEmpty(offset - 1)
+        
+        print()
 
-        offset /= 2
+        offset = int(offset / 2)
         level += 1
+        currentNode = None
+        tempqueue = []
 
-        while offset <= 1:
+        while level < depth:
+            for _ in range(2 ** level):
+                currentNode = queue.pop(0)
+                tempqueue.append(currentNode)
+                self.printEmpty(offset)
+                #print buffer
+                if currentNode:
+                    if currentNode.amLeft:
+                        print('/', end='')
+                    else:
+                        print('\\', end='')
+                print(' ', end='')
+                self.printEmpty(offset - 1)
 
+            print()
 
-#Test
+            for _ in range(2 ** level):
+                currentNode = tempqueue.pop(0)
+                if currentNode == None:
+                    self.printEmpty(offset * 2)
+                    queue.append(None)
+                    queue.append(None)
 
-b = BST(list(range(1, 11)))
-b.findMin()
-b.search(5)
-b.successor(5)
-b.delete(7)
+                queue.append(currentNode.leftChild)
+                if currentNode.leftChild != None:
+                    #Draw edge
+                    self.printLeft(offset)
+                else:
+                    self.printEmpty(offset)
+
+                print(currentNode.value, end='')
+
+                queue.append(self.root.rightChild)
+                if currentNode.rightChild != None:
+                    print('_', end='')
+                    #Draw edge
+                    self.printRight(offset) # handles -1
+                else:
+                    print(' ', end='')
+                    self.printEmpty(offset - 1)
+
+            print()
+            offset = int(offset / 2)
+            level += 1
+            
+        while queue != []:
+            currentNode = queue.pop(0)
+            if currentNode == None:
+                self.printEmpty(1)
+            else:
+                print(currentNode.value, end='')
+                print(' ', end='')
+
+        print()
+ """
+    def print_tree(self):
+        def display(root):
+            """Returns list of strings, width, height, and horizontal coordinate of the root."""
+            # No child.
+            if root.rightChild is None and root.leftChild is None:
+                line = '%s' % root.value
+                width = len(line)
+                height = 1
+                middle = width // 2
+                return [line], width, height, middle
+
+            # Only leftChild child.
+            if root.rightChild is None:
+                lines, n, p, x = display(root.leftChild)
+                s = '%s' % root.value
+                u = len(s)
+                first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
+                second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
+                shifted_lines = [line + u * ' ' for line in lines]
+                return [first_line, second_line] + shifted_lines, n + u, p + 2, n + u // 2
+
+            # Only rightChild child.
+            if root.leftChild is None:
+                lines, n, p, x = display(root.rightChild)
+                s = '%s' % root.value
+                u = len(s)
+                first_line = s + x * '_' + (n - x) * ' '
+                second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
+                shifted_lines = [u * ' ' + line for line in lines]
+                return [first_line, second_line] + shifted_lines, n + u, p + 2, u // 2
+
+            # Two children.
+            leftChild, n, p, x = display(root.leftChild)
+            rightChild, m, q, y = display(root.rightChild)
+            s = '%s' % root.value
+            u = len(s)
+            first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
+            second_line = x * ' ' + '/' + (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
+            if p < q:
+                leftChild += [n * ' '] * (q - p)
+            elif q < p:
+                rightChild += [m * ' '] * (p - q)
+            zipped_lines = zip(leftChild, rightChild)
+            lines = [first_line, second_line] + [a + u * ' ' + b for a, b in zipped_lines]
+            return lines, n + m + u, max(p, q) + 2, n + u // 2
+
+        lines, *_ = display(self.root)
+        for line in lines:
+            print(line)
+
