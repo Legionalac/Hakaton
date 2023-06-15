@@ -31,14 +31,7 @@ e7 = g.addEdge(v5, v6, 1)
 
 print(g)
 
-v = g.getNode("0")
-names = []
-output = []
-for v in g.vertices:
-    names.append(v.name)
-print (names)
-for v in g.vertices:
-    row = []
-    
-
+l = g.getMatrix()
+weights = g.printMatrix(l)
+print(weights)
 

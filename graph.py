@@ -1,4 +1,5 @@
 import math
+import copy
 class Vertex:
     def __init__(self, name = None, parent = None, distance = None):
         self.name = name
@@ -11,7 +12,7 @@ class Vertex:
     def __repr__(self):
         return str(self.name)
     def getDistance(self):
-        return (self.name,self.distance)
+        return self.distance
 
 class Edge:
     def __init__(self, src = None, dst = None, weight = None):
@@ -147,3 +148,54 @@ class Graph:
         for e in self.edges:
             output += f"{e}\n"
         return output
+    def getShortestPath(self , v):
+        x = v
+        stringOutput =""
+        names = []
+        while x!=None:
+           names.append(x.name)
+           x = x.parent
+        names.reverse()
+
+        for i in range(len(names)):
+            stringOutput+= names[i]
+            if i != len(names)-1:
+                stringOutput += " -> "
+        return (stringOutput,v.distance) 
+
+    def getMatrix(self):
+        names = []
+        output = []
+        print("  ",end="")
+        for v in self.vertices:
+            names.append(v.name)
+            print(v.name,end=" ")
+        print()
+        print("--------------------")
+        for v in self.vertices:
+            print(v.name , end="|")
+            row = []
+            self.Bellman_Ford(v)
+            for i in self.vertices:
+                if i.getDistance() == math.inf:
+                    row.append(0)
+                    print(0,end=" ")
+                else:
+                    row.append(self.getShortestPath(i))
+                    print(1,end=" ")
+            print()
+            output.append(row)
+        return output
+    def printMatrix(self, l):
+        weights = []
+        start = 0
+        stop = len(l)
+        step = 1
+        indexes = list(range(start, stop))
+        for i in range(0,len(l)):
+            for j in indexes:
+                if l[i][j] != 0 and i!=j:
+                    print(l[i][j][0] + "  ,w:" + str(l[i][j][1])) 
+                    weights.append(l[i][j][1])
+            indexes.reverse()
+        return weights
