@@ -1,24 +1,44 @@
 import graph
 
-g = Graph()
+g = graph.Graph()
 
-g.addVertex('A')
-g.addVertex('B')
-g.addVertex('C')
-g.addVertex('D')
-g.addVertex('E')
-g.addVertex('F')
+v1 = graph.Vertex(name="0")
+v2 = graph.Vertex(name="1")
+v3 = graph.Vertex(name="2")
+v4 = graph.Vertex(name="3")
+v5 = graph.Vertex(name="4")
+v6 = graph.Vertex(name="5")
 
-g.addEdge('A', 'B', 5)
-g.addEdge('A', 'E', 23)
-g.addEdge('B', 'C', 3)
-g.addEdge('B', 'E', 7)
-g.addEdge('C', 'D', 6)
-g.addEdge('C', 'F', 13)
-g.addEdge('D', 'E', 11)
-g.addEdge('E', 'F', 2)
+g.addVertex(v1)
+g.addVertex(v2)
+g.addVertex(v3)
+g.addVertex(v4)
+g.addVertex(v5)
+g.addVertex(v6)
+
+e0 = g.addEdge(v1, v3, 2)
+e1 = g.addEdge(v1, v5, 5)
+e2 = g.addEdge(v1, v6, 4)
+
+e3 = g.addEdge(v2, v5, 4)
+e4 = g.addEdge(v2, v6, 3)
+
+e5 = g.addEdge(v3, v4, 11)
+e6 = g.addEdge(v3, v5, 0)
+
+e7 = g.addEdge(v5, v6, 1)
+
 
 print(g)
-print()
 
-g.shortestPath('A', 'F')
+v = g.getNode("0")
+names = []
+output = []
+for v in g.vertices:
+    names.append(v.name)
+print (names)
+for v in g.vertices:
+    row = []
+    
+
+

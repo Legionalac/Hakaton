@@ -1,107 +1,149 @@
-import copy
-
+import math
 class Vertex:
-    def __init__(self, id):
-        self.id = id
-        self.edges = []
-
-    def addEdge(self, vertex, edge):
-        self.edges.append((vertex, edge))
+    def __init__(self, name = None, parent = None, distance = None):
+        self.name = name
+        self.parent = parent
+        self.distance = distance
 
     def __str__(self):
-        return str(self.id)
+        return str(self.name)
+
+    def __repr__(self):
+        return str(self.name)
+    def getDistance(self):
+        return (self.name,self.distance)
 
 class Edge:
-    def __init__(self, vertex1, vertex2, weigth = 1):
-        self.vertex1 = vertex1
-        self.vertex2 = vertex2
-        self.weigth = weigth
-
-    def __str__(self):
-        return str(self.vertex1) + ' -> ' + str(self.vertex2) + ', w = ' + str(self.weigth)
-
+    def __init__(self, src = None, dst = None, weight = None):
+        self.src = src
+        self.dst = dst
+        self.weight = weight
+    def __str__(self) -> str:
+        return f"src:{self.src} -> dst:{self.dst} , w:{self.weight}"
 
 class Graph:
     def __init__(self):
-        self.vertexes = []
+        self.vertices = []
         self.edges = []
 
-    def __str__(self):
-        out = str(self.edges[0])
-        for edge in self.edges[1:]:
-            out = out + '\n' + str(edge)
+    def getNode(self, name):
+        for v in self.vertices:
+            if v.name == name:
+                return v
 
-        return out
+    def GetInDegrees(self):
+        list = []
 
-    def getVertexById(self, id):
-        for vertex in self.vertexes:
-            if vertex.id == id:
-                return vertex
+        for v in self.vertices:
+            counter = 0
 
-        return None
+            for e in self.edges:
+                if e.dst == v:
+                    counter += 1
 
-    def getIndexById(self, id):
-        for i in range(len(self.vertexes)):
-            if self.vertexes[i].id == id:
-                return i
+            list.append(counter)
 
-        return None
+        return list
 
-    def addVertex(self, id):
-        self.vertexes.append(Vertex(id))
+    def GetOutDegrees(self):
+        list = []
 
-    def addEdge(self, vertex1_id, vertex2_id, weigth = 1):
-        vertex1 = self.getVertexById(vertex1_id)
-        vertex2 = self.getVertexById(vertex2_id)
+        for v in self.vertices:
+            counter = 0
 
-        if (vertex1 == None or vertex2 == None):
-            print('Missing a vertex!')
+            for e in self.edges:
+                if e.src == v:
+                    counter += 1
+
+            list.append(counter)
+
+        return list
+
+    def initialiseSingleSource(self, s):
+        for v in self.vertices:
+            v.distance = math.inf
+            v.parent = None
+
+        s.distance = 0
+
+    def relax(self, u, v, w):
+        if v.distance > u.distance + w:
+            v.distance = u.distance + w
+            v.parent = u
+
+    def extractMin(self, Q):
+        min = Q[0]
+
+        for v in Q:
+            if v.distance < min.distance:
+                min = v
+
+        Q.remove(min)
+
+        return min
+
+    def getAdj(self, x):
+        list = []
+
+        for e in self.edges:
+            if e.src == x:
+                list.append(e.dst)
+
+        return list
+
+    def getWeight(self, u, v):
+        for e in self.edges:
+            if e.src == u and e.dst == v:
+                return e.weight
+
+    def Dijkstra(self, a):
+        self.initialiseSingleSource(a)
+        S = []
+        Q = self.vertices[:]
+
+        while len(Q) > 0:
+            u = self.extractMin(Q)
+            S.append(u)
+            for v in self.getAdj(u):
+                self.relax(u, v, self.getWeight(u, v))
+
+    def printShortestPath(self, a, b, list):
+        if a == b:
+            list.append(a)
+        elif b.parent is not None:
+            self.printShortestPath(a, b.parent, list)
+            list.append(b)
+        else:
+            print("There is no such a path")
+            list.clear()
             return
-        
-        self.edges.append(Edge(vertex1, vertex2, weigth))
-        vertex1.addEdge(vertex2, self.edges[-1])
 
-    def shortestPath(self, source, end):
-        paths = []
-        checked = []
-        checkedNum = 0
-        trace = []
-        for vertex in self.vertexes:
-            checked.append(False)
-            trace.append([])
-            if vertex.id == source:
-                paths.append(0)
-            else:
-                paths.append(9999)
-        
-        vertexSrc = self.getVertexById(source)
-        vertexEnd = self.getVertexById(end)
-        
-        minPath = 10000
-        minVertex = None
+    def Bellman_Ford(self, a):
+        self.initialiseSingleSource(a)
+        for v in self.vertices:
+            for e in self.edges:
+                self.relax(e.src, e.dst, e.weight)
 
-        while checkedNum < len(checked):
-            minPath = 10000
-            for i, path in enumerate(paths):
-                if path < minPath and checked[i] == False:
-                    minPath = path
-                    minVertex = self.vertexes[i]
+        for e in self.edges:
+            if e.dst.distance > e.src.distance + e.weight:
+                return False
 
-            checked[self.getIndexById(minVertex.id)] = True
-            checkedNum += 1
+        return True
 
-            for neigh, edge in self.vertexes[self.getIndexById(minVertex.id)].edges:
-                if paths[self.getIndexById(minVertex.id)] + edge.weigth < paths[self.getIndexById(neigh.id)]:
-                    paths[self.getIndexById(neigh.id)] = paths[self.getIndexById(minVertex.id)] + edge.weigth
-                    trace[self.getIndexById(neigh.id)] = copy.deepcopy(trace[self.getIndexById(minVertex.id)])
-                    trace[self.getIndexById(neigh.id)].append(minVertex)
+    def UpdateEdge(self, a, b, w):
+        for e in self.edges:
+            if e.src == a and e.dst == b:
+                e.weight = w
+                return
 
-        #print(paths)
-        print('Min. path =', paths[self.getIndexById(end)])
-        for vertex in trace[self.getIndexById(end)]:
-            print(vertex.id, '-> ', end='')
-        print(end)
-
-
-        
-
+        e = Edge(src = a, dst = b, weight = w)
+        self.edges.append(e)
+    def addVertex(self, v):
+        self.vertices.append(v)
+    def addEdge(self, v1 ,v2 , w):
+        self.edges.append(Edge(v1,v2,w))
+    def __str__(self) -> str:
+        output=""
+        for e in self.edges:
+            output += f"{e}\n"
+        return output
