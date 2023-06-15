@@ -1,4 +1,5 @@
 import graph
+import tree
 
 g = graph.Graph()
 
@@ -23,7 +24,7 @@ e2 = g.addEdge(v1, v6, 4)
 e3 = g.addEdge(v2, v5, 4)
 e4 = g.addEdge(v2, v6, 3)
 
-e5 = g.addEdge(v3, v4, 11)
+e5 = g.addEdge(v3, v4, -11)
 e6 = g.addEdge(v3, v5, 0)
 
 e7 = g.addEdge(v5, v6, 1)
@@ -33,5 +34,9 @@ print(g)
 
 l = g.getMatrix()
 weights = g.printMatrix(l)
+print()
 print(weights)
+print('\n')
 
+b = tree.BST(weights)
+b.print_tree()
